@@ -116,6 +116,9 @@ public class PhoneFactory {
                 {
                     Log.i(LOG_TAG, "Using Samsung RIL");
                     sCommandsInterface = new SamsungRIL(context, networkMode, cdmaSubscription);
+                } else if ("samsungcdma".equals(sRILClassname)) {
+                    Log.i(LOG_TAG, "Using Samsung CDMA RIL");
+                    sCommandsInterface = new SamsungCdmaRIL(context, networkMode, cdmaSubscription);
                 } else if ("htc".equals(sRILClassname)) {
                     Log.i(LOG_TAG, "Using HTC RIL");
                     sCommandsInterface = new HTCRIL(context, networkMode, cdmaSubscription);
