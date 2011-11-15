@@ -40,7 +40,7 @@ public class SamsungCdmaRIL extends RIL implements CommandsInterface {
 
     private boolean mIsSamsungCdma = SystemProperties.getBoolean("ro.ril.samsung_cdma", false);
 
-    private boolean mIsSamsungCdmaBadRIL = SystemProperties.getBoolean("ro.ril.samsung_cdma.badril", false);
+    //private boolean mIsSamsungCdmaBadRIL = SystemProperties.getBoolean("ro.ril.samsung_cdma.badril", false);
 
 public SamsungCdmaRIL(Context context) {
         super(context);
@@ -66,12 +66,6 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
         if(mInitialRadioStateChange) {
             synchronized (mStateMonitor) {
                 if (!mState.isOn()) {
-                    // Do not attempt to set preferred network type on certain devices
-                    // which contain an incredibly broken RIL, instead, log the fact
-                    // that we overrode this standard operation
-                    if(mIsSamsungCdmaBadRIL) {
-                        Log.d(LOG_TAG, "BAD RIL: Not attempting to set preferred network type on radio powerup.");
-                    } else {
                     RILRequest rrPnt = RILRequest.obtain(
                                    RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE, null);
 
@@ -81,7 +75,6 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
                         + requestToString(rrPnt.mRequest) + " : " + mNetworkMode);
 
                     send(rrPnt);
-                    }
 
                     RILRequest rrCs = RILRequest.obtain(
                                    RIL_REQUEST_CDMA_SET_SUBSCRIPTION, null);
@@ -852,10 +845,10 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
         }*/
 
         // Attempt to fix shitty RIL on Samsung Admire
-        if (mIsSamsungCdmaBadRIL) {
+        /*if (mIsSamsungCdmaBadRIL) {
             Log.d(LOG_TAG, "BAD RIL: Not sending request. Network type is CDMA auto.");
             response[0] = Phone.NT_MODE_CDMA;
-        }
+        }*/
 
         return response;
     }
@@ -882,8 +875,8 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
         }
     }
 
-//    @Override
-//    public void getPreferredNetworkType(Message response) {
+    @Override
+    public void getPreferredNetworkType(Message response) {
         /* The radio implementation on the Samsung Admire is very poor, and
          * does not support the RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE or
          * the RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE requests, and as such
@@ -893,13 +886,25 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
          * We will not actually submit the RIL request to the radio, but simply
          * tell the system that the radio type is Phone.NT_TYPE_CDMA
          */
-//        RILRequest rr = RILRequest.obtain(
-//                RILConstants.RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE, response);
 
-//        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+        Log.d(LOG_TAG, "SamsungCDMA: getPreferredNetworkType, bypassing RIL, returning CDMA");
 
-//        send(rr);
-//    }
+        //RILRequest rr = RILRequest.obtain(
+                //RILConstants.RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE, response);
+
+        //if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        //send(rr);
+
+        // Set up response array
+        //int response[] = (int[]) responseInts(p);
+
+        // Set response to CDMA
+        //response[0] = Phone.NT_MODE_CDMA;
+
+        // Pass response back to query
+        //return response;
+    }
 
     @Override
     public void setPreferredNetworkType(int networkType , Message response) {
@@ -907,14 +912,9 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
          * while switching the preferred networktype.
          */
 
-        // Attempt to fix shitty RIL on Samsung Admire (and perhaps other devices)
-        // We're not actually going to send the RIL request here, because our RIL
-        // does not support the request
-        if (mIsSamsungCdmaBadRIL) {
-            Log.d(LOG_TAG, "BAD RIL: Not sending request. Network type is CDMA auto.");
-        } else {
+        Log.d(LOG_TAG, "SamsungCDMA: setPreferredNetworkType, sending request to /dev/null");
 
-            ConnectivityManager cm =
+            /*ConnectivityManager cm =
                 (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
             if(cm.getMobileDataEnabled())
@@ -923,8 +923,7 @@ public SamsungCdmaRIL(Context context, int networkMode, int cdmaSubscription) {
                 handler.setPreferedNetworkType(networkType, response);
             } else {
                 sendPreferedNetworktype(networkType, response);
-            }
-        }
+            }*/
     }
 
 
